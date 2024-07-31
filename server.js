@@ -100,7 +100,7 @@ const createAdminIfTableEmpty = () => {
           "Administrador",
           "2000-01-01",
           "phss15@discente.ifpe.edu.br",
-          "ifpecjbg",
+          "$2b$10$iuXflZD2n.dY6UHt7MyCVOaJN6wQZFvkIFS3cH0YLlCe3xCBt/DtO",
           "+5581997528011",
           "Administrador",
           formatDateForMySQL(new Date()),
@@ -137,7 +137,7 @@ app.get('/api/users', (req, res) => {
   });
 });
 
-// Listar todos os usuários
+// Listar todos os usuários 
 app.get('/api/products', (req, res) => {
   db.query('SELECT * FROM products', (err, results) => {
     if (err) {
