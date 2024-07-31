@@ -6,12 +6,24 @@ const app = express();
 const PORT = 3000;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const jwt = require("jsonwebtoken")
+const SECRET = "ifpe"
 
 // docker run --name mysql -e MYSQL_ROOT_PASSWORD=ifpecjbg -e MYSQL_DATABASE=marvie -p 3307:3306 -d mysql:latest  
 
 app.use(bodyParser.json());
 
 app.use(cors());
+
+async function verifyJWT(req, res, next){
+  const token = await req.headers["x-access-token"]
+  jwt.verify(token, SECRET, (err, decoded) => {
+    if(err) return res.status(401).end()
+
+      req.userId = decoded.userId
+      next()
+  })
+}
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -194,7 +206,7 @@ app.post('/api/users', (req, res) => {
 app.post('/api/login', (req, res) => {
   const { email, senha } = req.body;
 
-  const sql = 'SELECT senha FROM users WHERE email = ?';
+  const sql = 'SELECT id, senha FROM users WHERE email = ?';
   db.query(sql, [email], (err, results) => {
     if (err) {
       console.error("Erro ao buscar usuário:", err.message);
@@ -217,7 +229,9 @@ app.post('/api/login', (req, res) => {
       }
 
       if (isMatch) {
-        res.status(200).send('Login bem-sucedido');
+        const token = jwt.sign({userId: results[0].id}, SECRET, { expiresIn: 300 })
+        // res.status(200).send('Login bem-sucedido');
+        return res.json({ auth: true, token })
       } else {
         res.status(401).send('Senha incorreta');
       }
